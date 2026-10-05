@@ -20,7 +20,7 @@ jobs:
           channel: stable
 
       - name: Criar estrutura Android
-        run: flutter create --platforms android .
+        run: flutter create --project-name imperio_gestao --platforms android .
 
       - name: Instalar dependências
         run: flutter pub get
