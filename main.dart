@@ -10,153 +10,183 @@ class ImperioGestaoApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'IMPÉRIO GESTÃO',
       debugShowCheckedModeBanner: false,
+      title: 'IMPÉRIO GESTÃO',
       theme: ThemeData(
         useMaterial3: true,
-        colorSchemeSeed: Colors.indigo,
-        scaffoldBackgroundColor: const Color(0xFFF6F7FB),
+        colorSchemeSeed: Colors.blue,
+        scaffoldBackgroundColor: const Color(0xFFF5F7FA),
       ),
-      home: const LoginPage(),
+      home: const HomePage(),
     );
   }
 }
 
-class LoginPage extends StatelessWidget {
-  const LoginPage({super.key});
+// ======================================================
+// DADOS
+// ======================================================
 
-  @override
-  Widget build(BuildContext context) {
-    final user = TextEditingController();
-    final password = TextEditingController();
+class Cliente {
+  String nome;
+  String telefone;
+  double divida;
+  int comprasPendentes;
 
-    return Scaffold(
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 430),
-            child: Card(
-              child: Padding(
-                padding: const EdgeInsets.all(28),
-                child: Column(
-                  children: [
-                    const Icon(Icons.storefront, size: 64),
-                    const SizedBox(height: 12),
-                    const Text(
-                      'IMPÉRIO GESTÃO',
-                      style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 6),
-                    const Text('Vendas • Estoque • Clientes • Vendedores'),
-                    const SizedBox(height: 28),
-                    TextField(
-                      controller: user,
-                      decoration: const InputDecoration(
-                        labelText: 'Login',
-                        prefixIcon: Icon(Icons.person_outline),
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
-                    const SizedBox(height: 14),
-                    TextField(
-                      controller: password,
-                      obscureText: true,
-                      decoration: const InputDecoration(
-                        labelText: 'Senha',
-                        prefixIcon: Icon(Icons.lock_outline),
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    SizedBox(
-                      width: double.infinity,
-                      child: FilledButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const DashboardPage(),
-                            ),
-                          );
-                        },
-                        child: const Padding(
-                          padding: EdgeInsets.all(13),
-                          child: Text('ENTRAR'),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+  Cliente({
+    required this.nome,
+    required this.telefone,
+    this.divida = 0,
+    this.comprasPendentes = 0,
+  });
 }
 
-class DashboardPage extends StatelessWidget {
-  const DashboardPage({super.key});
+class Produto {
+  String nome;
+  double preco;
+  int estoque;
+
+  Produto({
+    required this.nome,
+    required this.preco,
+    required this.estoque,
+  });
+}
+
+class Vendedor {
+  String nome;
+  String login;
+  String senha;
+  bool ativo;
+
+  Vendedor({
+    required this.nome,
+    required this.login,
+    required this.senha,
+    this.ativo = true,
+  });
+}
+
+// Dados temporários.
+// Depois vamos ligar ao banco de dados na nuvem.
+
+final List<Cliente> clientes = [
+  Cliente(
+    nome: 'Cliente Exemplo',
+    telefone: '(98) 99999-9999',
+    divida: 150,
+    comprasPendentes: 1,
+  ),
+];
+
+final List<Produto> produtos = [
+  Produto(
+    nome: 'Sabão Líquido Lava Roupas',
+    preco: 25,
+    estoque: 800,
+  ),
+  Produto(
+    nome: 'Detergente',
+    preco: 5,
+    estoque: 300,
+  ),
+];
+
+final List<Vendedor> vendedores = [
+  Vendedor(
+    nome: 'Administrador',
+    login: 'admin',
+    senha: '1234',
+  ),
+];
+
+// ======================================================
+// HOME
+// ======================================================
+
+class HomePage extends StatefulWidget {
+  const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  int pagina = 0;
+
+  final List<Widget> paginas = const [
+    DashboardPage(),
+    ClientesPage(),
+    EstoquePage(),
+    VendasPage(),
+    AtrasadosPage(),
+    VendedoresPage(),
+  ];
+
+  final List<String> titulos = [
+    'IMPÉRIO GESTÃO',
+    'Clientes',
+    'Estoque',
+    'Vendas',
+    'Clientes em atraso',
+    'Vendedores',
+  ];
 
   @override
   Widget build(BuildContext context) {
-    final items = [
-      ('Vendas', Icons.shopping_cart_outlined),
-      ('Clientes', Icons.people_outline),
-      ('Produtos / Estoque', Icons.inventory_2_outlined),
-      ('Clientes em atraso', Icons.warning_amber_outlined),
-      ('Vendedores', Icons.badge_outlined),
-      ('Relatórios', Icons.bar_chart_outlined),
-    ];
-
     return Scaffold(
       appBar: AppBar(
-        title: const Text('IMPÉRIO GESTÃO'),
-        actions: [
-          IconButton(
-            tooltip: 'Sair',
-            onPressed: () => Navigator.pop(context),
-            icon: const Icon(Icons.logout),
-          ),
-        ],
-      ),
-      body: GridView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: items.length,
-        gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-          maxCrossAxisExtent: 260,
-          mainAxisExtent: 150,
-          crossAxisSpacing: 14,
-          mainAxisSpacing: 14,
+        title: Text(
+          titulos[pagina],
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
-        itemBuilder: (context, index) {
-          final item = items[index];
-          return Card(
-            child: InkWell(
-              borderRadius: BorderRadius.circular(12),
-              onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('${item.$1}: módulo em desenvolvimento')),
-                );
-              },
+        backgroundColor: Colors.blue,
+        foregroundColor: Colors.white,
+      ),
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            DrawerHeader(
+              decoration: const BoxDecoration(
+                color: Colors.blue,
+              ),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(item.$2, size: 42),
-                  const SizedBox(height: 12),
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: const [
+                  Icon(
+                    Icons.business,
+                    color: Colors.white,
+                    size: 45,
+                  ),
+                  SizedBox(height: 10),
                   Text(
-                    item.$1,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(fontWeight: FontWeight.w600),
+                    'IMPÉRIO GESTÃO',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 21,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    'Vendas • Estoque • Clientes',
+                    style: TextStyle(color: Colors.white70),
                   ),
                 ],
               ),
             ),
-          );
-        },
-      ),
-    );
-  }
-}
+
+            _menuItem(
+              icon: Icons.dashboard,
+              texto: 'Início',
+              index: 0,
+            ),
+
+            _menuItem(
+              icon: Icons.people,
+              texto: 'Clientes',
+              index: 1,
+            ),
+
+            _menuItem(
+              icon: Icons.inventory_2,
+              texto: 'Estoque
